@@ -199,12 +199,11 @@ connectWithRetry().then(async () => {
     }
   };
 
-  // Instead, only start the server if running locally
+  // Only start the server locally
   if (require.main === module) {
-    // Only run this if file is run directly (local dev)
     startServer();
   }
+});
 
-  // Export the app for Vercel
-  module.exports = app;
-}); 
+// Export the app for Vercel (must be at top level)
+module.exports = app; 
