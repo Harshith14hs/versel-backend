@@ -48,8 +48,8 @@ const connectWithRetry = async () => {
   }
 };
 
-// Connect to MongoDB
-connectWithRetry().then(async () => {
+// MongoDB connection and setup
+const setupApp = async () => {
   // Import models
   const Post = require('./models/Post');
   const User = require('./models/User');
@@ -67,29 +67,6 @@ connectWithRetry().then(async () => {
     }
     return user._id;
   }
-
-  let blogjetTeamUserId = null;
-  async function ensureBlogjetTeamUserId() {
-    if (!blogjetTeamUserId) {
-      blogjetTeamUserId = await getBlogjetTeamUserId();
-    }
-    return blogjetTeamUserId;
-  }
-
-  // Default posts definition (will be set at runtime)
-  let defaultPosts = [];
-
-  // Get all posts (from database only)
-  app.get('/api/posts', async (req, res) => {
-    try {
-      const posts = await Post.find()
-        .populate('author', 'username')
-        .sort({ createdAt: -1 });
-      res.json(posts);
-    } catch (error) {
-      res.status(500).json({ message: 'Error fetching posts', error: error.message });
-    }
-  });
 
   // Upsert default posts on server start
   async function upsertDefaultPosts() {
@@ -155,55 +132,29 @@ connectWithRetry().then(async () => {
       res.sendFile(path.join(__dirname, '../build/index.html'));
     });
   }
+};
 
-  // Function to find an available port
-  const findAvailablePort = async (startPort) => {
-    const net = require('net');
-    
-    return new Promise((resolve, reject) => {
-      const server = net.createServer();
-      server.unref();
-      server.on('error', (err) => {
-        if (err.code === 'EADDRINUSE') {
-          resolve(findAvailablePort(startPort + 1));
-        } else {
-          reject(err);
-        }
-      });
-      
-      server.listen(startPort, () => {
-        server.close(() => {
-          resolve(startPort);
-        });
-      });
-    });
-  };
+// Connect to MongoDB and setup app
+connectWithRetry().then(setupApp);
 
-  // Start server with port handling
+// Only start the server locally
+if (require.main === module) {
   const startServer = async () => {
     try {
       const desiredPort = process.env.PORT || 5000;
-      const port = await findAvailablePort(desiredPort);
-      
+      const port = desiredPort;
       app.listen(port, () => {
         console.log(`🚀 Server is running on port ${port}`);
         console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
         console.log(`🔗 API Base URL: http://localhost:${port}/api`);
-        if (port !== desiredPort) {
-          console.log(`⚠️  Note: Original port ${desiredPort} was in use, using ${port} instead`);
-        }
       });
     } catch (error) {
       console.error('❌ Failed to start server:', error);
       process.exit(1);
     }
   };
-
-  // Only start the server locally
-  if (require.main === module) {
-    startServer();
-  }
-});
+  startServer();
+}
 
 // Export the app for Vercel (must be at top level)
 module.exports = app; 
