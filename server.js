@@ -199,5 +199,12 @@ connectWithRetry().then(async () => {
     }
   };
 
-  startServer();
+  // Instead, only start the server if running locally
+  if (require.main === module) {
+    // Only run this if file is run directly (local dev)
+    startServer();
+  }
+
+  // Export the app for Vercel
+  module.exports = app;
 }); 
