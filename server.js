@@ -1,1 +1,0 @@
-// Moved to api/index.js for Vercel deployment. This file is now empty. 
