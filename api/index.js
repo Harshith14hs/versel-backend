@@ -14,7 +14,11 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: process.env.CORS_ORIGIN, // Set this in your environment variables, e.g. CORS_ORIGIN=https://your-frontend-url.com
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    return callback(null, origin);
+  },
   credentials: true
 }));
 app.use(express.json());
