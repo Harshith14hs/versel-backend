@@ -44,7 +44,7 @@ if (process.env.NODE_ENV === 'production') {
 
 // MongoDB Connection with retry logic
 const connectWithRetry = async () => {
-  const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://harsh:harsh@harsh.m5n2n.mongodb.net/blogjet';
+  const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://harsh:harsh@cluster0.zvng6ka.mongodb.net/blogjet';
   const maxRetries = 5;
   let retries = 0;
 

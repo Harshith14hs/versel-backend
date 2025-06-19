@@ -137,4 +137,9 @@ router.get('/test', (req, res) => {
   });
 });
 
+// Test GET route for /api/auth
+router.get('/', (req, res) => {
+  res.json({ message: 'Auth route is working!' });
+});
+
 module.exports = router; 
