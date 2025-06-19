@@ -111,10 +111,10 @@ const setupApp = async () => {
   await upsertDefaultPosts();
 
   // API Routes
-  app.use('/api/auth', authRoutes);
-  app.use('/api/posts', postRoutes);
-  app.use('/api/comments', commentRoutes);
-  app.use('/api/tasks', taskRoutes);
+  app.use('/auth', authRoutes);
+  app.use('/posts', postRoutes);
+  app.use('/comments', commentRoutes);
+  app.use('/tasks', taskRoutes);
 
   // Health check endpoint
   app.get('/api/health', (req, res) => {
