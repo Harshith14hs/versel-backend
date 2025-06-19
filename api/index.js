@@ -14,7 +14,9 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+  origin: [
+    'https://blog-app-69yz.onrender.com' // ONLY allow deployed frontend
+  ],
   credentials: true
 }));
 app.use(express.json());
