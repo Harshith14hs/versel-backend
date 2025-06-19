@@ -20,10 +20,10 @@ app.use(cors({
 app.use(express.json());
 
 // Register API Routes immediately
-app.use('/auth', authRoutes);
-app.use('/posts', postRoutes);
-app.use('/comments', commentRoutes);
-app.use('/tasks', taskRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/posts', postRoutes);
+app.use('/api/comments', commentRoutes);
+app.use('/api/tasks', taskRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
