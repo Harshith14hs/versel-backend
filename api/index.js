@@ -14,9 +14,7 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: [
-    'https://blog-app-69yz.onrender.com' // ONLY allow deployed frontend
-  ],
+  origin: process.env.CORS_ORIGIN, // Set this in your environment variables, e.g. CORS_ORIGIN=https://your-frontend-url.com
   credentials: true
 }));
 app.use(express.json());
