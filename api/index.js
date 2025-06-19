@@ -7,7 +7,7 @@ const path = require('path');
 // Import routes
 const authRoutes = require('../routes/auth');
 const postRoutes = require('../routes/posts');
-const commentRoutes = require('../routes/comments');
+const commentRoutes = require('../routes/comments'); 
 const taskRoutes = require('../routes/tasks');
 
 const app = express();
