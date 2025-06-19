@@ -19,6 +19,29 @@ app.use(cors({
 }));
 app.use(express.json());
 
+// Register API Routes immediately
+app.use('/auth', authRoutes);
+app.use('/posts', postRoutes);
+app.use('/comments', commentRoutes);
+app.use('/tasks', taskRoutes);
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ 
+    status: 'OK', 
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
+
+// Serve static files in production
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '../../build')));
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../../build/index.html'));
+  });
+}
+
 // MongoDB Connection with retry logic
 const connectWithRetry = async () => {
   const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://harsh:harsh@harsh.m5n2n.mongodb.net/blogjet';
@@ -48,9 +71,8 @@ const connectWithRetry = async () => {
   }
 };
 
-// MongoDB connection and setup
-const setupApp = async () => {
-  // Import models
+// Upsert default posts after MongoDB connects
+const upsertDefaultPosts = async () => {
   const Post = require('../models/Post');
   const User = require('../models/User');
 
@@ -69,73 +91,45 @@ const setupApp = async () => {
   }
 
   // Upsert default posts on server start
-  async function upsertDefaultPosts() {
-    try {
-      const authorId = await getBlogjetTeamUserId();
-      const defaultPosts = [
-        {
-          slug: 'welcome-to-blogjet',
-          title: 'Welcome to Blogjet!',
-          content: 'This is a default post. Start blogging now!',
-          excerpt: 'This is a default post. Start blogging now!',
-          image: 'https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80',
-          tag: 'Welcome',
-          author: authorId,
-          isDefault: true
-        },
-        {
-          slug: 'getting-started',
-          title: 'Getting Started',
-          content: 'Create your first post by clicking Create-Blog.',
-          excerpt: 'Create your first post by clicking Create-Blog.',
-          image: 'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80',
-          tag: 'Guide',
-          author: authorId,
-          isDefault: true
-        }
-      ];
-      for (const post of defaultPosts) {
-        await Post.findOneAndUpdate(
-          { slug: post.slug },
-          { $setOnInsert: post },
-          { upsert: true, new: true }
-        );
+  try {
+    const authorId = await getBlogjetTeamUserId();
+    const defaultPosts = [
+      {
+        slug: 'welcome-to-blogjet',
+        title: 'Welcome to Blogjet!',
+        content: 'This is a default post. Start blogging now!',
+        excerpt: 'This is a default post. Start blogging now!',
+        image: 'https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80',
+        tag: 'Welcome',
+        author: authorId,
+        isDefault: true
+      },
+      {
+        slug: 'getting-started',
+        title: 'Getting Started',
+        content: 'Create your first post by clicking Create-Blog.',
+        excerpt: 'Create your first post by clicking Create-Blog.',
+        image: 'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80',
+        tag: 'Guide',
+        author: authorId,
+        isDefault: true
       }
-      console.log('Default posts upserted.');
-    } catch (err) {
-      console.error('Error upserting default posts:', err.message);
+    ];
+    for (const post of defaultPosts) {
+      await Post.findOneAndUpdate(
+        { slug: post.slug },
+        { $setOnInsert: post },
+        { upsert: true, new: true }
+      );
     }
-  }
-
-  // Call upsert function after connecting to MongoDB
-  await upsertDefaultPosts();
-
-  // API Routes
-  app.use('/auth', authRoutes);
-  app.use('/posts', postRoutes);
-  app.use('/comments', commentRoutes);
-  app.use('/tasks', taskRoutes);
-
-  // Health check endpoint
-  app.get('/api/health', (req, res) => {
-    res.json({ 
-      status: 'OK', 
-      timestamp: new Date().toISOString(),
-      environment: process.env.NODE_ENV || 'development'
-    });
-  });
-
-  // Serve static files in production
-  if (process.env.NODE_ENV === 'production') {
-    app.use(express.static(path.join(__dirname, '../../build')));
-    app.get('*', (req, res) => {
-      res.sendFile(path.join(__dirname, '../../build/index.html'));
-    });
+    console.log('Default posts upserted.');
+  } catch (err) {
+    console.error('Error upserting default posts:', err.message);
   }
 };
 
-// Connect to MongoDB and setup app
-connectWithRetry().then(setupApp);
+// Connect to MongoDB and upsert default posts
+connectWithRetry().then(upsertDefaultPosts);
 
 // Export the app for Vercel
 module.exports = app; 
