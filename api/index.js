@@ -14,7 +14,7 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: 'https://blog-backend-w2la.onrender.com', // Only allow your deployed frontend
+  origin: 'https://blog-app-m8ao.onrender.com', // Only allow your deployed frontend
   credentials: true
 }));
 app.use(express.json());
